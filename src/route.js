@@ -22,17 +22,17 @@ const routes = [
     // untuk menampilkan detail buku
     {
         method: 'GET',
-        path: '/books/{bookId}',
+        path: '/books/{id}',
         handler: getBookbyIdHandler,
     },
     {
         method: 'PUT',
-        path: '/books/{bookId}',
+        path: '/books/{id}',
         handler: editBookbyIdHandler,
     },
     {
         method: 'DELETE',
-        path: '/books/{bookId}',
+        path: '/books/{id}',
         handler: deleteBookbyIdHandler,
     },
 ];
