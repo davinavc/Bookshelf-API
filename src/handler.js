@@ -6,26 +6,6 @@ const saveBookHandler = (req, h) => {
     const {
         name, year, author, summary, publisher, pageCount, readPage, reading,
     } = req.payload;
-    const id = nanoid(16);
-    const finished = pageCount === readPage;
-    const insertedAt = new Date().toISOString();
-    const updatedAt = insertedAt;
-
-    const saveBook = {
-        id,
-        name,
-        year,
-        author,
-        summary,
-        publisher,
-        pageCount,
-        readPage,
-        reading,
-        finished,
-        insertedAt,
-        updatedAt,
-    };
-    books.push(saveBook);
 
      if (name === undefined){
         const response = h.response({
@@ -42,6 +22,29 @@ const saveBookHandler = (req, h) => {
         response.code(400);
         return response;
     }
+    const id = nanoid(16);
+    const finished = pageCount === readPage;
+    const insertedAt = new Date().toISOString();
+    const updatedAt = insertedAt;
+
+    const saveBook = {
+      id,
+      name,
+      year,
+      author,
+      summary,
+      publisher,
+      pageCount,
+      readPage,
+      reading,
+      finished,
+      insertedAt,
+      updatedAt,
+  };
+  books.push(saveBook);
+
+  const isSuccess = books.filter((book) => book.id === id).length > 0;
+  if (isSuccess){
     const response = h.response({
         status: 'success',
         message: 'Buku berhasil ditambahkan',
@@ -51,46 +54,40 @@ const saveBookHandler = (req, h) => {
     });
     response.code(201);
     return response;
+  }
+  const response = h.response({
+    status: 'fail',
+    message: 'Buku gagal ditambahkan',
+  });
+  response.code(500);
+  return response;
 };
 
 const getAllBooksHandler = (req, h) => {
-    if (books.finished === 1){
-        const response = h.response({
-            status: 'success',
-            data: {
-                books: [
-                { id: '1', name: 'Buku A', publisher: 'Dicoding Indonesia' },
-            ],
-            },
-        });
-        response.code(200);
-        return response;
-    }
-    if (books.finished === 0){
-        const response = h.response({
-            status: 'success',
-            data: {
-                books: [
-                { id: '1', name: 'Buku A', publisher: 'Dicoding Indonesia' },
-                { id: '2', name: 'Buku B', publisher: 'Dicoding Indonesia' },
-                { id: '3', name: 'Buku C', publisher: 'Dicoding Indonesia' },
-            ],
-            },
-        });
-        response.code(200);
-        return response;
-    }
-    const response = h.response({
-        status: 'success',
-        data: {
-            books: [
-            { id: '1', name: 'Buku A', publisher: 'Dicoding Indonesia' },
-            { id: '2', name: 'Buku B', publisher: 'Dicoding Indonesia' },
-        ],
-        },
-    });
-    response.code(200);
-    return response;
+  const { name, reading, finished } = req.query;
+  let filteredBooks = books;
+  if (name !== undefined) {
+    filteredBooks = filteredBooks.filter((book) => book
+    .name.toLowerCase().includes(name.toLowerCase()));
+  }
+  if (reading !== undefined) {
+    filteredBooks = filteredBooks.filter((book) => book.reading === !!Number(reading));
+  }
+  if (finished !== undefined) {
+    filteredBooks = filteredBooks.filter((book) => book.finished === !!Number(finished));
+  }
+  const response = h.response({
+    status: 'success',
+    data: {
+      books: filteredBooks.map((book) => ({
+        id: book.id,
+        name: book.name,
+        publisher: book.publisher,
+      })),
+    },
+  });
+  response.code(200);
+  return response;
 };
 
 const getBookbyIdHandler = (req, h) => {
